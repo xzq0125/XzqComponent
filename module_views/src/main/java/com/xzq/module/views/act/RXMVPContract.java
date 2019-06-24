@@ -10,11 +10,7 @@ import com.xzq.module_base.mvp.IListView;
  */
 public interface RXMVPContract {
 
-    interface View extends IListView<HomePageBean.Datas> {
-    }
-
-    interface Presenter {
-        void getData(int page);
+    interface View extends IListView<HomePageBean> {
     }
 
 }

@@ -1,14 +1,10 @@
 package com.xzq.module_base.base;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.xzq.module_base.R;
 import com.xzq.module_base.adapter.BaseRecyclerFooterAdapter;
 import com.xzq.module_base.adapter.IAdapter;
@@ -28,13 +24,9 @@ import am.widget.stateframelayout.StateFrameLayout;
 public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
         extends BasePresenterActivity<P>
         implements BaseListContract.View<T>,
-        StateFrameLayout.OnStateClickListener,
-        OnRefreshListener,
         BaseRecyclerFooterAdapter.OnLoadMoreCallback {
 
-    protected StateFrameLayout sfl;//状态布局
     protected RecyclerView recyclerView;
-    protected SmartRefreshLayout refreshLayout;
     protected IAdapter<T> mAdapter;
     protected int mPage = 1;
 
@@ -46,12 +38,6 @@ public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
     @Override
     protected void initViews(@Nullable Bundle savedInstanceState) {
         setToolbar(getPageTitle());
-        sfl = findViewById(R.id.sfl);
-        if (sfl != null) {
-            sfl.setOnStateClickListener(this);
-        }
-        refreshLayout = findViewById(R.id.refreshLayout);
-        refreshLayout.setOnRefreshListener(this);
         BaseRecyclerFooterAdapter<T> wrapAdapter = new BaseRecyclerFooterAdapter<>(getPageAdapter());
         wrapAdapter.setLoadMoreCallback(this);
         mAdapter = wrapAdapter;
@@ -59,44 +45,59 @@ public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
         recyclerView.setAdapter(wrapAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         addItemDecoration(recyclerView);
-        onErrorClick(null);
     }
 
     @Override
-    public void onErrorClick(StateFrameLayout layout) {
+    protected void getFirstPageData() {
         refresh();
     }
 
-    @Override
-    public void onFirstLoading() {
-        if (sfl != null) {
-            sfl.loading();
-        }
-    }
+    //    @Override
+//    public void onFirstLoading() {
+//        if (sfl != null) {
+//            sfl.loading();
+//        }
+//    }
+//
+//    @Override
+//    public void onFirstLoadFinish() {
+//        if (sfl != null) {
+//            sfl.normal();
+//        }
+//        refreshLayout.finishRefresh();
+//    }
+//
+//    @Override
+//    public void onFirstLoadEmpty() {
+//        if (sfl != null) {
+//            sfl.empty();
+//        }
+//        if (mAdapter != null) {
+//            mAdapter.clear();
+//        }
+//    }
+//
+//    @Override
+//    public void onFirstLoadError(int page, String error) {
+//        if (sfl != null) {
+//            sfl.error();
+//        }
+//        if (mAdapter != null) {
+//            mAdapter.clear();
+//        }
+//    }
 
     @Override
-    public void onFirstLoadFinish() {
-        if (sfl != null) {
-            sfl.normal();
-        }
-        refreshLayout.finishRefresh();
-    }
-
-    @Override
-    public void onFirstLoadEmpty() {
-        if (sfl != null) {
-            sfl.empty();
-        }
+    public void onStateEmpty() {
+        super.onStateEmpty();
         if (mAdapter != null) {
             mAdapter.clear();
         }
     }
 
     @Override
-    public void onFirstLoadError(int page, String error) {
-        if (sfl != null) {
-            sfl.error();
-        }
+    public void onStateError(int page, String error) {
+        super.onStateError(page, error);
         if (mAdapter != null) {
             mAdapter.clear();
         }
@@ -112,23 +113,35 @@ public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
         onPageLoad(mPage);
     }
 
+//    @Override
+//    public void onShowLoadMoreError(int page, String error) {
+//        if (mAdapter != null) {
+//            mAdapter.onError();
+//        }
+//    }
+//
+//    @Override
+//    public void onShowLoadMoreEmpty() {
+//        if (mAdapter != null) {
+//            mAdapter.onEmpty();
+//        }
+//    }
+
+
     @Override
-    public void onShowLoadMoreError(int page, String error) {
+    public void onStateLoadMoreError(int page, String error) {
+        super.onStateLoadMoreError(page, error);
         if (mAdapter != null) {
             mAdapter.onError();
         }
     }
 
     @Override
-    public void onShowLoadMoreEmpty() {
+    public void onStateLoadMoreEmpty() {
+        super.onStateLoadMoreEmpty();
         if (mAdapter != null) {
             mAdapter.onEmpty();
         }
-    }
-
-    @Override
-    public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-        refresh();
     }
 
     @Override

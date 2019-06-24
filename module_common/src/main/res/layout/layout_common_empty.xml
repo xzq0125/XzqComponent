@@ -9,6 +9,6 @@
     android:gravity="center_horizontal"
     android:lineSpacingExtra="15dp"
     android:paddingTop="120dp"
-    android:text="没有发现内容"
+    android:text="暂无数据"
     android:textColor="@color/color_999999"
     android:textSize="16sp" />

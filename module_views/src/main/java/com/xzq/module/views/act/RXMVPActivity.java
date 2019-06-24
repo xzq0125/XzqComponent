@@ -11,10 +11,10 @@ import android.widget.TextView;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.xzq.module.views.R;
-import com.xzq.module_base.arouter.Router;
-import com.xzq.module_base.arouter.RouterUtils;
 import com.xzq.module_base.adapter.BaseRecyclerAdapter;
 import com.xzq.module_base.adapter.BaseRecyclerViewHolder;
+import com.xzq.module_base.arouter.Router;
+import com.xzq.module_base.arouter.RouterUtils;
 import com.xzq.module_base.base.BaseListActivity;
 import com.xzq.module_base.bean.HomePageBean;
 import com.xzq.module_base.utils.ToastUtils;
@@ -23,7 +23,7 @@ import com.xzq.module_base.utils.XZQLog;
 import java.util.List;
 
 @Route(path = Router.Path.MVP)
-public class RXMVPActivity extends BaseListActivity<RXMVPPresenter, HomePageBean.Datas> implements RXMVPContract.View {
+public class RXMVPActivity extends BaseListActivity<RXMVPPresenter, HomePageBean> implements RXMVPContract.View {
 
     @Autowired(name = Router.Extra.MVP_POS)
     int pos;
@@ -49,10 +49,15 @@ public class RXMVPActivity extends BaseListActivity<RXMVPPresenter, HomePageBean
 
     @Override
     protected RecyclerView.Adapter getPageAdapter() {
-        return new MyAdapter();
+        return new MyAdapter().setOnItemClickListener(new BaseRecyclerViewHolder.OnItemClickListener<HomePageBean>() {
+            @Override
+            public void onItemClicked(View v, HomePageBean data, int pos) {
+                ToastUtils.show(data.title+pos);
+            }
+        });
     }
 
-    private final class MyAdapter extends BaseRecyclerAdapter<HomePageBean.Datas, MyViewHolder> {
+    public final class MyAdapter extends BaseRecyclerAdapter<HomePageBean, MyViewHolder> {
 
         @NonNull
         @Override
@@ -66,32 +71,32 @@ public class RXMVPActivity extends BaseListActivity<RXMVPPresenter, HomePageBean
         }
 
         @Override
-        public void onConvert(@NonNull MyViewHolder holder, HomePageBean.Datas data,
+        public void onConvert(@NonNull MyViewHolder holder, HomePageBean data,
                               int position, @NonNull List<Object> payload) {
             holder.setData(data);
         }
 
     }
 
-    private final class MyViewHolder extends BaseRecyclerViewHolder<HomePageBean.Datas> implements View.OnClickListener {
+    private final class MyViewHolder extends BaseRecyclerViewHolder<HomePageBean> implements View.OnClickListener {
 
         private TextView tv;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             tv = (TextView) itemView;
-            tv.setOnClickListener(this);
+            //tv.setOnClickListener(this);
         }
 
         @Override
-        public void setData(HomePageBean.Datas data) {
+        public void setData(HomePageBean data) {
             tv.setTag(data.link);
             tv.setText(position + "\t" + data.title + "\t" + data.niceDate);
         }
 
         @Override
         public void onClick(View v) {
-            ToastUtils.show(data.title);
+            ToastUtils.show(data.title+position);
         }
     }
 

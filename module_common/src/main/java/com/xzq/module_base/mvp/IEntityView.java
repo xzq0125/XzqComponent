@@ -6,7 +6,7 @@ package com.xzq.module_base.mvp;
  *
  * @author xzq
  */
-public interface IEntityView<Entity> extends ILoadingEntityView {
+public interface IEntityView<Entity> extends IStateView {
 
     /**
      * 设置数据

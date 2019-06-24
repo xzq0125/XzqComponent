@@ -5,18 +5,28 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.xzq.module_base.R;
 import com.xzq.module_base.eventbus.EventUtil;
 import com.xzq.module_base.eventbus.MessageEvent;
+import com.xzq.module_base.mvp.IStateView;
 import com.xzq.module_base.utils.XZQLog;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Locale;
+
+import am.widget.stateframelayout.StateFrameLayout;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
@@ -27,7 +37,7 @@ import butterknife.Unbinder;
  * @author xzq
  */
 
-public abstract class BaseActivity extends SimpleLoadingActivity {
+public abstract class BaseActivity extends AppCompatActivity implements IStateView, OnRefreshListener, StateFrameLayout.OnStateClickListener {
 
     //Activity生命周期
     private ActivityState mState = ActivityState.CREATE;
@@ -41,18 +51,55 @@ public abstract class BaseActivity extends SimpleLoadingActivity {
         CREATE, START, RESTART, RESUME, PAUSE, STOP, DESTROY
     }
 
+    private StateFrameLayout sfl;
+    protected SmartRefreshLayout refreshLayout;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mState = ActivityState.CREATE;
+
+        if (getClass().getSimpleName().equals("com.xzq.component.MainActivity")) {
+            overridePendingTransition(R.anim.activity_open_enter_main, R.anim.activity_open_exit);
+        } else {
+            overridePendingTransition(R.anim.activity_open_enter, R.anim.activity_open_exit);
+        }
+
         XZQLog.debug("BaseActivity", getClass().getSimpleName());
         EventUtil.register(this);
         final int layoutId = getLayoutId();
+
+        ViewGroup contentParent = findViewById(android.R.id.content);
+
+        XZQLog.debug("contentParent = " + contentParent);
+
+        View contentView = LayoutInflater.from(this)
+                .inflate(R.layout.activity_base, contentParent, false);
+
+
+        sfl = contentView.findViewById(R.id.sfl);
+        sfl.setOnStateClickListener(this);
+        refreshLayout = contentView.findViewById(R.id.refreshLayout);
+        refreshLayout.setOnRefreshListener(this);
+
         if (layoutId > 0) {
-            setContentView(layoutId);
-            unbinder = ButterKnife.bind(this);
+            View src = LayoutInflater.from(this)
+                    .inflate(layoutId, sfl);
+            unbinder = ButterKnife.bind(this, src);
         }
+
+        setContentView(contentView);
+
         initViews(savedInstanceState);
+        onErrorClick(null);
+    }
+
+    protected void hideToolbar() {
+        findViewById(R.id.toolbar).setVisibility(View.GONE);
+    }
+
+    protected void setRefreshEnable() {
+        refreshLayout.setEnabled(false);
     }
 
     /**
@@ -118,6 +165,7 @@ public abstract class BaseActivity extends SimpleLoadingActivity {
     public void setToolbar(String title) {
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
+            setSupportActionBar(toolbar);
             //标题
             TextView titleView = (TextView) toolbar.findViewById(R.id.toolbar_title);
             if (titleView != null) {
@@ -140,8 +188,11 @@ public abstract class BaseActivity extends SimpleLoadingActivity {
                     }
                 });
             }
-
-            setSupportActionBar(toolbar);
+        } else {
+            TextView titleView = (TextView) findViewById(R.id.toolbar_title);
+            if (titleView != null) {
+                titleView.setText(title);
+            }
         }
     }
 
@@ -172,5 +223,78 @@ public abstract class BaseActivity extends SimpleLoadingActivity {
      */
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onMessageStickyEvent(@NonNull MessageEvent event) {
+    }
+
+    @Override
+    public void onStateLoading(String loadingMessage) {
+        if (!isRefresh) {
+            sfl.loading();
+        }
+        XZQLog.debug("onStateLoading  loadingMessage = " + loadingMessage);
+    }
+
+    @Override
+    public void onStateError(int page, String error) {
+        this.<TextView>findViewById(R.id.tv_error_view)
+                .setText(String.format(Locale.getDefault(), "%1$s\n点击重新加载", error));
+        sfl.error();
+        XZQLog.debug("onStateLoading  error = " + error);
+    }
+
+    @Override
+    public void onStateEmpty() {
+        sfl.empty();
+        XZQLog.debug("onStateEmpty");
+    }
+
+    @Override
+    public void onStateNormal() {
+        refreshLayout.finishRefresh();
+        sfl.normal();
+        XZQLog.debug("onStateNormal");
+    }
+
+    @Override
+    public void onStateLoadMoreEmpty() {
+        XZQLog.debug("onStateLoadMoreEmpty");
+    }
+
+    @Override
+    public void onStateLoadMoreError(int page, String error) {
+        XZQLog.debug("onStateLoadMoreError error = " + error + " page = " + page);
+    }
+
+    @Override
+    public void onShowLoading(String loadingMessage) {
+        XZQLog.debug("onShowLoading loadingMessage = " + loadingMessage);
+    }
+
+    @Override
+    public void onHideLoading() {
+        XZQLog.debug("onHideLoading");
+    }
+
+
+    @Override
+    public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+        isRefresh = true;
+        getFirstPageData();
+    }
+
+    @Override
+    public void onErrorClick(StateFrameLayout layout) {
+        isRefresh = false;
+        getFirstPageData();
+    }
+
+    private boolean isRefresh = false;
+
+    protected void getFirstPageData() {
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.activity_close_enter, R.anim.activity_close_exit);
     }
 }

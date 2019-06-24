@@ -1,15 +1,11 @@
 package com.xzq.module_base.base;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.xzq.module_base.R;
 import com.xzq.module_base.adapter.BaseRecyclerFooterAdapter;
@@ -31,89 +27,121 @@ public abstract class BaseListFragment<P extends BaseListContract.Presenter, T>
         extends BasePresenterFragment<P>
         implements BaseListContract.View<T>,
         StateFrameLayout.OnStateClickListener,
-        BaseRecyclerFooterAdapter.OnLoadMoreCallback, OnRefreshListener {
+        BaseRecyclerFooterAdapter.OnLoadMoreCallback,
+        OnRefreshListener {
 
-    StateFrameLayout sfl;//状态布局
-    RecyclerView recyclerView;
-    SmartRefreshLayout refreshLayout;
-    private IAdapter<T> mAdapter;
-    private int mPage = 1;
+    protected RecyclerView recyclerView;
+    protected IAdapter<T> mAdapter;
+    protected int mPage = 1;
 
     @Override
     protected int getLayoutId(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return getLayoutId();
+        return R.layout.activity_base_list;
     }
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-        View root = getView();
-        if (root == null) {
-            return;
-        }
-        sfl = root.findViewById(R.id.sfl);
-        recyclerView = root.findViewById(R.id.recyclerView);
-        refreshLayout = root.findViewById(R.id.refreshLayout);
-
-        if (sfl != null) {
-            sfl.setOnStateClickListener(this);
-        }
-        refreshLayout.setOnRefreshListener(this);
         BaseRecyclerFooterAdapter<T> wrapAdapter = new BaseRecyclerFooterAdapter<>((RecyclerView.Adapter) getPageAdapter());
         wrapAdapter.setLoadMoreCallback(this);
         mAdapter = wrapAdapter;
+        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setAdapter(wrapAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(me));
         addItemDecoration(recyclerView);
-        onErrorClick(null);
     }
 
     @Override
-    public void onErrorClick(StateFrameLayout layout) {
-        refreshLayout.autoRefresh(1);
+    protected void getFirstPageData() {
+        refresh();
     }
 
-    @Override
-    public void onFirstLoading() {
-        //empty
-    }
+    //    @Override
+//    public void onFirstLoading() {
+//        if (sfl != null) {
+//            sfl.loading();
+//        }
+//    }
+//
+//    @Override
+//    public void onFirstLoadFinish() {
+//        if (sfl != null) {
+//            sfl.normal();
+//        }
+//        refreshLayout.finishRefresh();
+//    }
+//
+//    @Override
+//    public void onFirstLoadEmpty() {
+//        if (sfl != null) {
+//            sfl.empty();
+//        }
+//        if (mAdapter != null) {
+//            mAdapter.clear();
+//        }
+//    }
+//
+//    @Override
+//    public void onFirstLoadError(int page, String error) {
+//        if (sfl != null) {
+//            sfl.error();
+//        }
+//        if (mAdapter != null) {
+//            mAdapter.clear();
+//        }
+//    }
 
     @Override
-    public void onFirstLoadFinish() {
-        if (sfl != null) {
-            sfl.normal();
-        }
-        refreshLayout.finishRefresh();
-    }
-
-    @Override
-    public void onFirstLoadError(int page, String error) {
-        if (sfl != null) {
-            sfl.error();
-        }
+    public void onStateEmpty() {
+        super.onStateEmpty();
         if (mAdapter != null) {
             mAdapter.clear();
         }
     }
 
     @Override
-    public void onFirstLoadEmpty() {
-        if (sfl != null) {
-            sfl.empty();
-        }
+    public void onStateError(int page, String error) {
+        super.onStateError(page, error);
         if (mAdapter != null) {
             mAdapter.clear();
         }
     }
 
     @Override
-    public void onShowLoadMoreError(int page, String error) {
+    public void onAutoLoadMore(StateFrameLayout loadMore) {
+        onPageLoad(mPage);
+    }
+
+    @Override
+    public void onReloadMore(StateFrameLayout loadMore) {
+        onPageLoad(mPage);
+    }
+
+//    @Override
+//    public void onShowLoadMoreError(int page, String error) {
+//        if (mAdapter != null) {
+//            mAdapter.onError();
+//        }
+//    }
+//
+//    @Override
+//    public void onShowLoadMoreEmpty() {
+//        if (mAdapter != null) {
+//            mAdapter.onEmpty();
+//        }
+//    }
+
+
+    @Override
+    public void onStateLoadMoreError(int page, String error) {
+        super.onStateLoadMoreError(page, error);
         if (mAdapter != null) {
             mAdapter.onError();
         }
     }
 
     @Override
-    public void onShowLoadMoreEmpty() {
+    public void onStateLoadMoreEmpty() {
+        super.onStateLoadMoreEmpty();
         if (mAdapter != null) {
             mAdapter.onEmpty();
         }
@@ -139,21 +167,6 @@ public abstract class BaseListFragment<P extends BaseListContract.Presenter, T>
         }
     }
 
-    @Override
-    public void onAutoLoadMore(StateFrameLayout loadMore) {
-        onPageLoad(mPage);
-    }
-
-    @Override
-    public void onReloadMore(StateFrameLayout loadMore) {
-        onPageLoad(mPage);
-    }
-
-    @Override
-    public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-        refresh();
-    }
-
     public void onPageLoad(int page) {
         if (presenter != null) {
             presenter.getList(page);
@@ -165,10 +178,6 @@ public abstract class BaseListFragment<P extends BaseListContract.Presenter, T>
         onPageLoad(mPage);
     }
 
-    protected int getLayoutId() {
-        return R.layout.layout_common_list;
-    }
-
     /**
      * 添加默认分割线
      *
@@ -177,6 +186,13 @@ public abstract class BaseListFragment<P extends BaseListContract.Presenter, T>
     protected void addItemDecoration(RecyclerView recyclerView) {
         recyclerView.addItemDecoration(DividerFactory.VERTICAL);
     }
+
+    /**
+     * 获取页面标题
+     *
+     * @return 标题
+     */
+    protected abstract String getPageTitle();
 
     /**
      * 获取页面适配器

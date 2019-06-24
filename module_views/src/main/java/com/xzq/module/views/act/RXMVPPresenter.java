@@ -3,7 +3,6 @@ package com.xzq.module.views.act;
 import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 
-import com.xzq.module_base.bean.HomePageBean;
 import com.xzq.module_base.mvp.AbsPresenter;
 import com.xzq.module_base.mvp.BaseListContract;
 
@@ -14,25 +13,13 @@ import com.xzq.module_base.mvp.BaseListContract;
  */
 public class RXMVPPresenter extends AbsPresenter<RXMVPContract.View> implements BaseListContract.Presenter {
 
-    RXMVPPresenter(@NonNull RXMVPContract.View view) {
+    public RXMVPPresenter(@NonNull RXMVPContract.View view) {
         super(view);
     }
 
     @SuppressLint("CheckResult")
     @Override
     public void getList(final int page) {
-        doEntityRequest(api -> api.getWangAndroidHomePage(page), HomePageBean.class)
-                .subscribeWith(new PagingNetCallback<HomePageBean>(page) {
-
-                    @Override
-                    protected void onSetData(HomePageBean data, int page, boolean hasNextPage) {
-                        mView.setData(data.datas, page, hasNextPage);
-                    }
-
-                    @Override
-                    protected void onAddData(HomePageBean data, int page, boolean hasNextPage) {
-                        mView.addData(data.datas, page, hasNextPage);
-                    }
-                });
+        doBaseListRequest(api -> api.getWangAndroidHomePage(page), page);
     }
 }

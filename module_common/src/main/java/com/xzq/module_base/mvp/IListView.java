@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author xzq
  */
-public interface IListView<Entity> extends ILoadingListView {
+public interface IListView<Entity> extends IStateView {
 
     /**
      * 设置数据

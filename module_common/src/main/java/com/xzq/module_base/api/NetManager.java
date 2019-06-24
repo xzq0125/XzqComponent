@@ -60,8 +60,8 @@ public class NetManager {
                 .readTimeout(15L, TimeUnit.SECONDS)
                 .writeTimeout(15L, TimeUnit.SECONDS)
                 .connectTimeout(15L, TimeUnit.SECONDS)
-                .addInterceptor(new AddCacheInterceptor())
-                .cache(cache)
+//                .addInterceptor(new AddCacheInterceptor())
+//                .cache(cache)
                 .build();
         retrofit = new Retrofit.Builder()
                 .client(client)

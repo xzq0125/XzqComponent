@@ -25,6 +25,13 @@ public abstract class BaseRecyclerAdapter<T, VH extends BaseRecyclerViewHolder<T
     protected List<T> mData = new ArrayList<>();
     private LayoutInflater mInflater = null;
 
+    private BaseRecyclerViewHolder.OnItemClickListener<T> itemClickListener;
+
+    public BaseRecyclerAdapter setOnItemClickListener(BaseRecyclerViewHolder.OnItemClickListener<T> itemClickListener) {
+        this.itemClickListener = itemClickListener;
+        return this;
+    }
+
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -55,7 +62,7 @@ public abstract class BaseRecyclerAdapter<T, VH extends BaseRecyclerViewHolder<T
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position, @NonNull List<Object> payloads) {
         T data = getDataAt(position);
-        holder.bindData(data, position);
+        holder.bindData(itemClickListener, data, position);
         onConvert(holder, data, position, payloads);
     }
 

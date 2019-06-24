@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">module_base</string>
     <string name="ba_load_more_empty_msg">没有更多数据了</string>
-    <string name="ba_load_more_err_msg">点击重新加载</string>
+    <string name="ba_load_more_err_msg">点击加载更多</string>
 </resources>

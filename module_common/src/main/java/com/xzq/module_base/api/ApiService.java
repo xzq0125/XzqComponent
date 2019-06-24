@@ -21,7 +21,7 @@ public interface ApiService {
      * hasBody：是否有请求体
      */
     @HTTP(method = "GET", path = "/article/list/{page}/json", hasBody = false)
-    Observable<NetBean<HomePageBean>> getWangAndroidHomePage(
+    Observable<NetBean<BaseListBean<HomePageBean>>> getWangAndroidHomePage(
             @Path("page") int page);
 
     @FormUrlEncoded

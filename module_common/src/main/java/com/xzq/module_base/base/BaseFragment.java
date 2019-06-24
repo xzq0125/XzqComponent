@@ -6,16 +6,29 @@ import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.xzq.module_base.R;
 import com.xzq.module_base.eventbus.EventUtil;
 import com.xzq.module_base.eventbus.MessageEvent;
+import com.xzq.module_base.mvp.IStateView;
+import com.xzq.module_base.utils.XZQLog;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Locale;
+
+import am.widget.stateframelayout.StateFrameLayout;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
@@ -25,7 +38,10 @@ import butterknife.Unbinder;
  *
  * @author xzq
  */
-public abstract class BaseFragment extends SimpleLoadingFragment {
+public abstract class BaseFragment extends Fragment
+        implements IStateView,
+        StateFrameLayout.OnStateClickListener,
+        OnRefreshListener {
 
     private Unbinder unbinder;
 
@@ -82,25 +98,78 @@ public abstract class BaseFragment extends SimpleLoadingFragment {
         super.onDestroyView();
     }
 
+    private StateFrameLayout sfl;
+    protected SmartRefreshLayout refreshLayout;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(getLayoutId(inflater, container, savedInstanceState),
-                container, false);
+        final int layoutId = getLayoutId(inflater, container, savedInstanceState);
+        View rootView = LayoutInflater.from(me)
+                .inflate(R.layout.activity_base, container, false);
+        sfl = rootView.findViewById(R.id.sfl);
+        sfl.setOnStateClickListener(this);
+        refreshLayout = rootView.findViewById(R.id.refreshLayout);
+        refreshLayout.setOnRefreshListener(this);
+        if (layoutId > 0) {
+            View src = LayoutInflater.from(me)
+                    .inflate(layoutId, sfl);
+            unbinder = ButterKnife.bind(this, src);
+        }
+        return rootView;
+    }
+
+    protected void hideToolbar() {
+        findViewById(R.id.toolbar).setVisibility(View.GONE);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        unbinder = ButterKnife.bind(this, view);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        hideToolbar();
         initViews(savedInstanceState);
+        onErrorClick(null);
     }
+
+    @SuppressWarnings("all")
+    public void setToolbar(String title) {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            //标题
+            TextView titleView = (TextView) toolbar.findViewById(R.id.toolbar_title);
+            if (titleView != null) {
+                titleView.setText(title);
+            }
+            //返回按钮
+            View btnBack = toolbar.findViewById(R.id.toolbar_btn_back);
+            if (btnBack != null) {
+                btnBack.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getActivity().onBackPressed();
+                    }
+                });
+            } else {
+                toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getActivity().onBackPressed();
+                    }
+                });
+            }
+        }
+    }
+
+    public void setToolbar(@StringRes int resId) {
+        setToolbar(getString(resId));
+    }
+
 
     /**
      * 设置内容Layout
@@ -161,4 +230,71 @@ public abstract class BaseFragment extends SimpleLoadingFragment {
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onMessageStickyEvent(@NonNull MessageEvent event) {
     }
+
+    @Override
+    public void onStateLoading(String loadingMessage) {
+        if (!isRefresh) {
+            sfl.loading();
+        }
+        XZQLog.debug("onStateLoading  loadingMessage = " + loadingMessage);
+    }
+
+    @Override
+    public void onStateError(int page, String error) {
+        this.<TextView>findViewById(R.id.tv_error_view)
+                .setText(String.format(Locale.getDefault(), "%1$s\n点击重新加载", error));
+        sfl.error();
+        XZQLog.debug("onStateLoading  error = " + error);
+    }
+
+    @Override
+    public void onStateEmpty() {
+        sfl.empty();
+        XZQLog.debug("onStateEmpty");
+    }
+
+    @Override
+    public void onStateNormal() {
+        refreshLayout.finishRefresh();
+        sfl.normal();
+        XZQLog.debug("onStateNormal");
+    }
+
+    @Override
+    public void onStateLoadMoreEmpty() {
+        XZQLog.debug("onStateLoadMoreEmpty");
+    }
+
+    @Override
+    public void onStateLoadMoreError(int page, String error) {
+        XZQLog.debug("onStateLoadMoreError error = " + error + " page = " + page);
+    }
+
+    @Override
+    public void onShowLoading(String loadingMessage) {
+        XZQLog.debug("onShowLoading loadingMessage = " + loadingMessage);
+    }
+
+    @Override
+    public void onHideLoading() {
+        XZQLog.debug("onHideLoading");
+    }
+
+    @Override
+    public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+        isRefresh = true;
+        getFirstPageData();
+    }
+
+    @Override
+    public void onErrorClick(StateFrameLayout layout) {
+        isRefresh = false;
+        getFirstPageData();
+    }
+
+    private boolean isRefresh = false;
+
+    protected void getFirstPageData() {
+    }
+
 }

@@ -1,25 +1,31 @@
 package com.xzq.module_base.api;
 
+import android.net.ParseException;
 import android.support.annotation.NonNull;
 
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import com.xzq.module_base.mvp.BaseListBean;
-import com.xzq.module_base.mvp.ILoadingEntityView;
-import com.xzq.module_base.mvp.ILoadingListView;
-import com.xzq.module_base.utils.XZQLog;
+import com.xzq.module_base.mvp.IPostLoadingView;
+import com.xzq.module_base.mvp.IStateView;
+import com.xzq.module_base.utils.ToastUtils;
 
+import org.json.JSONException;
+
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import io.reactivex.observers.ResourceObserver;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 /**
- * 网络响应基础回调
- * Created by Wesley on 2018/7/9.
+ * 网络回调
+ *
+ * @author xzq
  */
-
-public abstract class NetCallback<Entity> extends ResourceObserver<NetBean<Entity>> {
+@SuppressWarnings("all")
+public abstract class NetCallback<T> implements Observer<NetBean<T>> {
 
     private static final int FIRST_PAGE_INDEX = 1;
     //本地自定义错误码
@@ -28,88 +34,57 @@ public abstract class NetCallback<Entity> extends ResourceObserver<NetBean<Entit
     public static final int CODE_NET_BREAK = -127;
     public static final int CODE_FAILED = -128;
     private static final String DEF_LOADING_MSG = "加载中...";
-    private ILoadingListView mLoadingListView;
-    private ILoadingEntityView mLoadingView;
     private String mLoadingMessage;
     private int mPage = FIRST_PAGE_INDEX;
     private boolean onComplete = false;
+    private IPostLoadingView mPostLoading;
+    private IStateView mStateLoading;
 
     public NetCallback() {
-        this(null, DEF_LOADING_MSG);
     }
 
-    public NetCallback(String loadingMessage) {
-        this(null, loadingMessage);
+    public NetCallback(IPostLoadingView mPostLoading) {
+        this.mPostLoading = mPostLoading;
+        this.mLoadingMessage = DEF_LOADING_MSG;
     }
 
-    public NetCallback(ILoadingEntityView loadingView) {
-        this(loadingView, DEF_LOADING_MSG);
-    }
-
-    public NetCallback(ILoadingEntityView loadingView, String loadingMessage) {
-        this(loadingView, loadingMessage, FIRST_PAGE_INDEX);
-    }
-
-    public NetCallback(ILoadingEntityView loadingView, int page) {
-        this(loadingView, DEF_LOADING_MSG, page);
-    }
-
-    public NetCallback(ILoadingEntityView loadingView, String loadingMessage, int page) {
-        this.mLoadingView = loadingView;
-        this.mLoadingMessage = loadingMessage;
+    public NetCallback(IStateView mStateLoading, int page) {
+        this.mStateLoading = mStateLoading;
         this.mPage = page;
-        if (page > 0 && loadingView instanceof ILoadingListView) {
-            this.mLoadingListView = (ILoadingListView) loadingView;
-        }
+        this.mLoadingMessage = DEF_LOADING_MSG;
+    }
+
+    public NetCallback(IPostLoadingView mPostLoading, int page) {
+        this.mPostLoading = mPostLoading;
+        this.mPage = page;
+        this.mLoadingMessage = DEF_LOADING_MSG;
     }
 
     @Override
-    protected void onStart() {
-        if (mLoadingView != null) {
-            mLoadingView.onShowLoading(mLoadingMessage);
-        }
-        if (mLoadingListView != null && isFirstPage()) {
-            mLoadingListView.onFirstLoading();
-        }
+    public void onSubscribe(Disposable d) {
+        callbackLoading();
     }
 
     @Override
     public void onComplete() {
         if (!onComplete) {
-            complete();
+            callbackComplete();
             onComplete = true;
         }
     }
 
-    private void complete() {
-        if (mLoadingView != null) {
-            mLoadingView.onHideLoading();
-        }
-        if (mLoadingListView != null && isFirstPage()) {
-            mLoadingListView.onFirstLoadFinish();
-        }
-    }
-
     @Override
-    public void onNext(@NonNull NetBean<Entity> netResponse) {
+    public void onNext(@NonNull NetBean<T> netResponse) {
         final String msg = netResponse.getMsg();
         final int code = netResponse.getStatus();
         if (netResponse.isOk()) {
             onComplete();
-            Entity entity = netResponse.getData();
+            T entity = netResponse.getData();
             boolean isEmpty = entity == null ||
-                    entity instanceof List && ((List) entity).isEmpty();
+                    (entity instanceof BaseListBean && ((BaseListBean) entity).isEmpty())
+                    || entity instanceof List && ((List) entity).isEmpty();
             if (isEmpty) {
-                if (mLoadingView != null) {
-                    mLoadingView.onShowEmpty();
-                }
-                if (mLoadingListView != null) {
-                    if (isFirstPage()) {
-                        mLoadingListView.onFirstLoadEmpty();
-                    } else {
-                        mLoadingListView.onShowLoadMoreEmpty();
-                    }
-                }
+                callbackEmpty();
             }
             boolean hasNextPage = netResponse.hasNextPage(mPage);
             if (entity instanceof BaseListBean) {
@@ -127,10 +102,14 @@ public abstract class NetCallback<Entity> extends ResourceObserver<NetBean<Entit
         //返回错误信息
         String error;
         int code;
-        if (e instanceof JsonSyntaxException) {
+        if (e instanceof JsonSyntaxException
+                || e instanceof JsonParseException
+                || e instanceof JSONException
+                || e instanceof ParseException) {
             error = "数据解析异常";
             code = CODE_JSON;
-        } else if (e instanceof SocketTimeoutException) {
+        } else if (e instanceof SocketTimeoutException
+                || e instanceof ConnectException) {
             error = "请求超时";
             code = CODE_TIMEOUT;
         } else if (e instanceof UnknownHostException) {
@@ -145,30 +124,99 @@ public abstract class NetCallback<Entity> extends ResourceObserver<NetBean<Entit
             code = CODE_FAILED;
         }
 
-        XZQLog.debug("NetCallback", e.getMessage());
-
         onError(error, code);
         onComplete();
 
-        if (mLoadingView != null) {
-            mLoadingView.onShowError(error, mPage);
+        callbackError(error);
+    }
+
+    /**
+     * 回调加载中
+     */
+    private void callbackLoading() {
+        if (mPostLoading != null) {
+            mPostLoading.onShowPostLoading(mLoadingMessage);
         }
-        if (mLoadingListView != null) {
-            if (isFirstPage())
-                mLoadingListView.onFirstLoadError(mPage, error);
-            else
-                mLoadingListView.onShowLoadMoreError(mPage, error);
+        if (mStateLoading != null) {
+            mStateLoading.onShowLoading(mLoadingMessage);
+            if (isFirstPage()) {
+                mStateLoading.onStateLoading(mLoadingMessage);
+            }
         }
     }
 
+    /**
+     * 回调加载完成
+     */
+    private void callbackComplete() {
+        if (mPostLoading != null) {
+            mPostLoading.onHidePostLoading();
+        }
+        if (mStateLoading != null) {
+            mStateLoading.onHideLoading();
+            if (isFirstPage()) {
+                mStateLoading.onStateNormal();
+            }
+        }
+    }
+
+    /**
+     * 回调加载空
+     */
+    private void callbackEmpty() {
+        if (mStateLoading != null) {
+            if (isFirstPage()) {
+                mStateLoading.onStateEmpty();
+            } else {
+                mStateLoading.onStateLoadMoreEmpty();
+            }
+        }
+    }
+
+    /**
+     * 回调加载错误
+     *
+     * @param error 错误信息
+     */
+    private void callbackError(String error) {
+        if (mStateLoading != null) {
+            if (isFirstPage()) {
+                mStateLoading.onStateError(mPage, error);
+            } else {
+                mStateLoading.onStateLoadMoreError(mPage, error);
+            }
+        }
+    }
+
+    /**
+     * 是否是第一页
+     *
+     * @return 是否是第一页
+     */
     protected boolean isFirstPage() {
         return mPage == FIRST_PAGE_INDEX;
     }
 
-    protected abstract void onSuccess(Entity data, String msg, int code, int page, boolean hasNextPage);
+    /**
+     * 请求返回成功
+     *
+     * @param data        数据实体
+     * @param msg         msg
+     * @param code        code
+     * @param page        页码，针对分页加载页码
+     * @param hasNextPage 是否还有下一页，针对分页加载页码
+     */
+    protected abstract void onSuccess(T data, String msg, int code, int page, boolean hasNextPage);
 
+    /**
+     * 显示默认错误信息，toast一下
+     *
+     * @param error 错误信息
+     * @param code  错误码
+     */
     protected void onError(String error, int code) {
-        //ToastUtils.show(error);
+        if (mStateLoading == null) {
+            ToastUtils.show(error);
+        }
     }
-
 }
