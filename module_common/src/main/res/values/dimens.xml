@@ -1,0 +1,25 @@
+<resources>
+
+    <!--dp start-->
+    <dimen name="toolbar_height">45dp</dimen>
+    <!--dp end-->
+
+    <!--sp start-->
+    <dimen name="textSize_8">8sp</dimen>
+    <dimen name="textSize_9">9sp</dimen>
+    <dimen name="textSize_10">10sp</dimen>
+    <dimen name="textSize_11">11sp</dimen>
+    <dimen name="textSize_12">12sp</dimen>
+    <dimen name="textSize_13">13sp</dimen>
+    <dimen name="textSize_14">14sp</dimen>
+    <dimen name="textSize_15">15sp</dimen>
+    <dimen name="textSize_16">16sp</dimen>
+    <dimen name="textSize_17">17sp</dimen>
+    <dimen name="textSize_18">18sp</dimen>
+    <dimen name="textSize_19">19sp</dimen>
+    <dimen name="textSize_20">20sp</dimen>
+    <dimen name="textSize_21">21sp</dimen>
+    <dimen name="textSize_22">22sp</dimen>
+    <!--sp end-->
+
+</resources>

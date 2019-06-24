@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="toolbar" type="id" />
+    <item name="toolbar_title" type="id" />
+    <item name="toolbar_btn_back" type="id" />
+
+    <!--分页列表-->
+    <item type="id" name="refreshLayout"/>
+    <item type="id" name="smartRefreshLayout"/>
+    <item type="id" name="recyclerView"/>
+    <item type="id" name="sfl"/>
+    <!--状态页面-->
+    <item type="id" name="errorView"/>
+    <item type="id" name="emptyView"/>
+
+</resources>

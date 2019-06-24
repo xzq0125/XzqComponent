@@ -1,0 +1,57 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="ToolbarTitle">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/textSize_18</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingRight">15dp</item>
+    </style>
+
+    <!--状态布局样式-->
+    <style name="StateFrameLayoutStyle">
+        <item name="sflLoadingLayout">@layout/layout_common_loading</item>
+        <item name="sflEmptyLayout">@layout/layout_common_empty</item>
+        <item name="sflErrorLayout">@layout/layout_common_error</item>
+    </style>
+
+    <style name="ActionButtonStyle" parent="Widget.AppCompat.Light.ActionButton">
+        <item name="android:background">@drawable/bg_common_press_nomask</item>
+        <item name="android:minWidth">@dimen/toolbar_height</item>
+        <item name="android:minHeight">@dimen/toolbar_height</item>
+    </style>
+
+    <style name="NavigationButtonStyle" parent="Widget.AppCompat.Toolbar.Button.Navigation">
+        <item name="android:background">@drawable/bg_common_press_nomask</item>
+        <item name="android:minWidth">@dimen/toolbar_height</item>
+        <item name="android:minHeight">@dimen/toolbar_height</item>
+    </style>
+
+    <style name="ActionBarStyle" parent="Widget.AppCompat.Light.ActionBar">
+        <item name="background">@color/white</item>
+        <item name="android:background">@color/themeColor</item>
+        <item name="displayOptions">homeAsUp</item>
+        <item name="android:displayOptions">homeAsUp</item>
+        <item name="elevation">0dp</item>
+        <item name="navigationIcon">@drawable/ic_back</item>
+        <item name="contentInsetStartWithNavigation">0dp</item>
+        <item name="contentInsetEnd">@dimen/toolbar_height</item>
+      <!--  <item name="contentInsetEnd">0dp</item>-->
+        <item name="contentInsetStart">0dp</item>
+    </style>
+
+    <style name="LoadingDialogStyle" parent="@android:style/Theme.Dialog">
+        <item name="android:windowAnimationStyle">@style/FadeDialogAnimation</item>
+    </style>
+
+    <style name="FadeDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/dialog_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/dialog_fade_out</item>
+    </style>
+
+</resources>

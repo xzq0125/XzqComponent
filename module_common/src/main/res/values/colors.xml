@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--theme start-->
+    <color name="themeColor">#ff241f37</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#ff241f37</color>
+    <!--theme end-->
+
+    <!--base start-->
+    <color name="red">#ffff0000</color>
+    <color name="green">#ff00ff00</color>
+    <color name="blue">#ff0000ff</color>
+    <color name="white">#ffffffff</color>
+    <color name="black">#ff000000</color>
+    <color name="transparent">#00000000</color><!--完全透明-->
+    <color name="translucent">#80000000</color><!--半透明-->
+    <color name="translucent_white">#80FFFFFF</color><!--半透明-->
+    <!--base end-->
+
+    <!--ripple start-->
+    <color name="ripple_light">#1f000000</color>
+    <color name="ripple_dark">#4dffffff</color>
+    <!--ripple end-->
+
+    <color name="color_1a1a1a">#ff1a1a1a</color>
+    <color name="color_999999">#ff999999</color>
+    <color name="color_cccccc">#ffcccccc</color>
+
+    <!--RecyclerView分割线-->
+    <color name="color_divider">#ffe6e6e6</color>
+
+
+    <color name="text_color">#333333</color>
+    <color name="text_color_hit">#DDD7D3</color>
+    <color name="yingguanglv">#00D9c8</color>
+    <color name="bg_color">#e9e9e9</color>
+
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tool:context=".MainActivity">
+
+    <am.widget.gradienttabstrip.GradientTabStrip
+        android:id="@+id/main_gts_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_gradienttabstrip_tab"
+        app:gtsDotColor="#ffff0000"
+        app:gtsDrawablePadding="4dp"
+        app:gtsItemBackground="?selectableItemBackgroundBorderless"
+        app:gtsTextColorNormal="#FF999999"
+        app:gtsTextColorSelected="#FF00dac9"
+        app:gtsTextSize="12sp" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/main_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/main_gts_tabs" />
+
+</RelativeLayout>
