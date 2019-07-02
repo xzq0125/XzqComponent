@@ -11,8 +11,7 @@ import butterknife.internal.DebouncingOnClickListener;
  * @author xzq
  */
 
-public abstract class BaseRecyclerViewHolder<T> extends RecyclerView.ViewHolder
-        implements View.OnClickListener {
+public abstract class BaseRecyclerViewHolder<T> extends RecyclerView.ViewHolder {
 
     protected T data;
     protected int position;
@@ -20,7 +19,6 @@ public abstract class BaseRecyclerViewHolder<T> extends RecyclerView.ViewHolder
 
     public BaseRecyclerViewHolder(View itemView) {
         super(itemView);
-        itemView.setOnClickListener(this);
         itemView.setOnClickListener(new DebouncingOnClickListener() {
             @Override
             public void doClick(View v) {

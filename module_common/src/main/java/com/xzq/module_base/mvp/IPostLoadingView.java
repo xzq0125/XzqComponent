@@ -4,8 +4,9 @@ package com.xzq.module_base.mvp;
  * 加载框接口，适用于发送类似Post请求时显示加载框
  * <p>
  * 网络回调使用{@link io.reactivex.Observer}的子类
- * {@link com.gxkeji.ob.base.mvp.BasePresenter.PostLoadingCallback}
- * 作为观察者时会触发onShowPostLoading和onHidePostLoading回调
+ * {@link com.xzq.module_base.mvp.AbsPresenter.PostLoadingCallback}
+ * 作为观察者时会触发{@link #onShowPostLoading(java.lang.String loadingMessage)}
+ * 和{@link #onHidePostLoading()}回调
  *
  * @author xzq
  */

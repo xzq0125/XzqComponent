@@ -13,7 +13,7 @@ import com.xzq.module_base.utils.XZQLog;
  * MeFragment
  * Created by xzq on 2018/12/20.
  */
-public class MeFragment extends BasePresenterFragment<MePresenter> implements MeContract.MView {
+public class MeFragment extends BasePresenterFragment {
 
     public static MeFragment newInstance() {
 
@@ -22,11 +22,6 @@ public class MeFragment extends BasePresenterFragment<MePresenter> implements Me
         MeFragment fragment = new MeFragment();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    protected MePresenter createPresenter() {
-        return new MePresenter(this);
     }
 
     @Override
@@ -50,11 +45,6 @@ public class MeFragment extends BasePresenterFragment<MePresenter> implements Me
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-
-    }
-
-    @Override
-    public void setData(Object o) {
 
     }
 }

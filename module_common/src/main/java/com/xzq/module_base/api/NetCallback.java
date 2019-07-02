@@ -1,6 +1,7 @@
 package com.xzq.module_base.api;
 
 import android.net.ParseException;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 
 import com.google.gson.JsonParseException;
@@ -14,7 +15,6 @@ import org.json.JSONException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.List;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -31,8 +31,8 @@ public abstract class NetCallback<T> implements Observer<NetBean<T>> {
     //本地自定义错误码
     public static final int CODE_JSON = -125;
     public static final int CODE_TIMEOUT = -126;
-    public static final int CODE_NET_BREAK = -127;
-    public static final int CODE_FAILED = -128;
+    public static final int CODE_NET_BROKEN = -127;
+    public static final int CODE_UNKNOWN = -128;
     private static final String DEF_LOADING_MSG = "加载中...";
     private String mLoadingMessage;
     private int mPage = FIRST_PAGE_INDEX;
@@ -61,6 +61,7 @@ public abstract class NetCallback<T> implements Observer<NetBean<T>> {
     }
 
     @Override
+    @CallSuper
     public void onSubscribe(Disposable d) {
         callbackLoading();
     }
@@ -74,26 +75,19 @@ public abstract class NetCallback<T> implements Observer<NetBean<T>> {
     }
 
     @Override
-    public void onNext(@NonNull NetBean<T> netResponse) {
-        final String msg = netResponse.getMsg();
-        final int code = netResponse.getStatus();
-        if (netResponse.isOk()) {
+    public void onNext(@NonNull NetBean<T> response) {
+        final String msg = response.getMsg();
+        final int code = response.getStatus();
+        if (response.isOk()) {
             onComplete();
-            T entity = netResponse.getData();
-            boolean isEmpty = entity == null ||
-                    (entity instanceof BaseListBean && ((BaseListBean) entity).isEmpty())
-                    || entity instanceof List && ((List) entity).isEmpty();
+            T entity = response.getData();
+            boolean isEmpty = response.isDataEmpty();
             if (isEmpty) {
                 callbackEmpty();
             }
-            boolean hasNextPage = netResponse.hasNextPage(mPage);
-            if (entity instanceof BaseListBean) {
-                hasNextPage = ((BaseListBean) entity).hasNextPage(mPage);
-            }
-            onSuccess(entity, msg, code, mPage, hasNextPage);
-
+            onSuccess(response, entity, mPage);
         } else {
-            onError(new ErrorCodeException(msg, code));
+            onError(new ApiException(msg, code));
         }
     }
 
@@ -114,14 +108,14 @@ public abstract class NetCallback<T> implements Observer<NetBean<T>> {
             code = CODE_TIMEOUT;
         } else if (e instanceof UnknownHostException) {
             error = "网络已断开";
-            code = CODE_NET_BREAK;
-        } else if (e instanceof ErrorCodeException) {
-            ErrorCodeException ex = (ErrorCodeException) e;
-            error = ex.getMessage();
-            code = ex.errorCode();
+            code = CODE_NET_BROKEN;
+        } else if (e instanceof ApiException) {
+            ApiException ae = (ApiException) e;
+            error = ae.getMessage();
+            code = ae.getCode();
         } else {
             error = "未知错误";
-            code = CODE_FAILED;
+            code = CODE_UNKNOWN;
         }
 
         onError(error, code);
@@ -200,16 +194,14 @@ public abstract class NetCallback<T> implements Observer<NetBean<T>> {
     /**
      * 请求返回成功
      *
-     * @param data        数据实体
-     * @param msg         msg
-     * @param code        code
-     * @param page        页码，针对分页加载页码
-     * @param hasNextPage 是否还有下一页，针对分页加载页码
+     * @param response 最外层数据实体
+     * @param data     数据实体
+     * @param page     page 当前请求页码
      */
-    protected abstract void onSuccess(T data, String msg, int code, int page, boolean hasNextPage);
+    protected abstract void onSuccess(NetBean<T> response, T data, int page);
 
     /**
-     * 显示默认错误信息，toast一下
+     * 显示默认错误信息，没有回调状态布局就toast一下
      *
      * @param error 错误信息
      * @param code  错误码

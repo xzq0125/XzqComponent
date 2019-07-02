@@ -48,7 +48,6 @@ public class MainActivity extends BaseActivity implements OnTabSelectListener {
     @Override
     protected void initViews(@Nullable Bundle savedInstanceState) {
         hideToolbar();
-        setRefreshEnable();
         vpFragments = findViewById(R.id.main_viewpager);
         adapter = new GradientTabStripAdapter(getSupportFragmentManager());
         vpFragments.setOffscreenPageLimit(adapter.getCount());

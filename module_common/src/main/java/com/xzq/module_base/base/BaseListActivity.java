@@ -8,7 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import com.xzq.module_base.R;
 import com.xzq.module_base.adapter.BaseRecyclerFooterAdapter;
 import com.xzq.module_base.adapter.IAdapter;
-import com.xzq.module_base.mvp.BaseListContract;
+import com.xzq.module_base.mvp.IListView;
+import com.xzq.module_base.mvp.MvpContract;
 import com.xzq.module_base.utils.DividerFactory;
 
 import java.util.List;
@@ -21,9 +22,9 @@ import am.widget.stateframelayout.StateFrameLayout;
  * @author xzq
  */
 
-public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
+public abstract class BaseListActivity<P extends MvpContract.CommonPresenter, T>
         extends BasePresenterActivity<P>
-        implements BaseListContract.View<T>,
+        implements IListView<T>,
         BaseRecyclerFooterAdapter.OnLoadMoreCallback {
 
     protected RecyclerView recyclerView;
@@ -37,55 +38,20 @@ public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
 
     @Override
     protected void initViews(@Nullable Bundle savedInstanceState) {
+        setRefreshEnable(true);
         setToolbar(getPageTitle());
         BaseRecyclerFooterAdapter<T> wrapAdapter = new BaseRecyclerFooterAdapter<>(getPageAdapter());
         wrapAdapter.setLoadMoreCallback(this);
         mAdapter = wrapAdapter;
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setAdapter(wrapAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        addItemDecoration(recyclerView);
+        initRecyclerView(recyclerView);
     }
 
     @Override
     protected void getFirstPageData() {
         refresh();
     }
-
-    //    @Override
-//    public void onFirstLoading() {
-//        if (sfl != null) {
-//            sfl.loading();
-//        }
-//    }
-//
-//    @Override
-//    public void onFirstLoadFinish() {
-//        if (sfl != null) {
-//            sfl.normal();
-//        }
-//        refreshLayout.finishRefresh();
-//    }
-//
-//    @Override
-//    public void onFirstLoadEmpty() {
-//        if (sfl != null) {
-//            sfl.empty();
-//        }
-//        if (mAdapter != null) {
-//            mAdapter.clear();
-//        }
-//    }
-//
-//    @Override
-//    public void onFirstLoadError(int page, String error) {
-//        if (sfl != null) {
-//            sfl.error();
-//        }
-//        if (mAdapter != null) {
-//            mAdapter.clear();
-//        }
-//    }
 
     @Override
     public void onStateEmpty() {
@@ -112,21 +78,6 @@ public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
     public void onReloadMore(StateFrameLayout loadMore) {
         onPageLoad(mPage);
     }
-
-//    @Override
-//    public void onShowLoadMoreError(int page, String error) {
-//        if (mAdapter != null) {
-//            mAdapter.onError();
-//        }
-//    }
-//
-//    @Override
-//    public void onShowLoadMoreEmpty() {
-//        if (mAdapter != null) {
-//            mAdapter.onEmpty();
-//        }
-//    }
-
 
     @Override
     public void onStateLoadMoreError(int page, String error) {
@@ -166,7 +117,8 @@ public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
 
     public void onPageLoad(int page) {
         if (presenter != null) {
-            presenter.getList(page);
+            presenter.setPage(page);
+            presenter.getList();
         }
     }
 
@@ -176,12 +128,13 @@ public abstract class BaseListActivity<P extends BaseListContract.Presenter, T>
     }
 
     /**
-     * 添加默认分割线
+     * 初始化RecyclerView
      *
      * @param recyclerView RecyclerView
      */
-    protected void addItemDecoration(RecyclerView recyclerView) {
+    protected void initRecyclerView(RecyclerView recyclerView) {
         recyclerView.addItemDecoration(DividerFactory.VERTICAL);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     /**

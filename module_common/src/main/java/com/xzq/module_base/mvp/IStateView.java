@@ -5,13 +5,13 @@ package com.xzq.module_base.mvp;
  * 比如 loading、empty、error、normal
  * <p>
  * 如果你的页面需要这种状态，网络回调应该使用
- * {@link com.gxkeji.ob.base.mvp.BasePresenter.StateCallback}
+ * {@link com.xzq.module_base.mvp.AbsPresenter.StateCallback}
  * 作为观察者
  *
  * @author xzq
  */
 
-public interface IStateView extends ILoadingView{
+public interface IStateView extends ILoadingView {
 
     /**
      * 加载中

@@ -13,7 +13,7 @@ import com.xzq.module_base.utils.XZQLog;
  * HomePageFragment
  * Created by xzq on 2018/12/20.
  */
-public class HomePageFragment extends BasePresenterFragment<HomePagePresenter> implements HomePageContract.HPView {
+public class HomePageFragment extends BasePresenterFragment  {
 
     public static HomePageFragment newInstance() {
 
@@ -22,11 +22,6 @@ public class HomePageFragment extends BasePresenterFragment<HomePagePresenter> i
         HomePageFragment fragment = new HomePageFragment();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    protected HomePagePresenter createPresenter() {
-        return new HomePagePresenter(this);
     }
 
     @Override
@@ -51,8 +46,4 @@ public class HomePageFragment extends BasePresenterFragment<HomePagePresenter> i
         tv.setOnClickListener(v -> RouterUtils.openMvp(me, 10));
     }
 
-    @Override
-    public void setData(Object o) {
-
-    }
 }

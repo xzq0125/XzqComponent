@@ -10,7 +10,8 @@ import io.reactivex.schedulers.Schedulers;
 
 /**
  * ModelService
- * Created by Wesley on 2018/7/9.
+ *
+ * @author xzq
  */
 public class ModelService {
 
@@ -23,7 +24,7 @@ public class ModelService {
      * 发起网络请求，响应体{@link NetBean}中data字段为对象
      */
     public static <T> Observable<NetBean<T>> doEntityRequest(Class<T> cls, ApiCallback<T> apiCallback) {
-       ApiService api = NetManager.retrofit().create(ApiService.class);
+        ApiService api = NetManager.retrofit().create(ApiService.class);
         return apiCallback.getApi(api)
                 .compose(schedulersTransformer())
                 .map(netBean -> {

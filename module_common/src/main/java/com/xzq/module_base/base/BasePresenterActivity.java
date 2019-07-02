@@ -3,7 +3,7 @@ package com.xzq.module_base.base;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import com.xzq.module_base.mvp.BasePresenter;
+import com.xzq.module_base.mvp.MvpContract;
 
 
 /**
@@ -12,32 +12,26 @@ import com.xzq.module_base.mvp.BasePresenter;
  * @author xzq
  */
 
-public abstract class BasePresenterActivity<P>
-        extends BaseActivity {
+public abstract class BasePresenterActivity<P extends MvpContract.CommonPresenter> extends BaseActivity {
 
     protected P presenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         presenter = createPresenter();
+        presenter.attachView(this);
         super.onCreate(savedInstanceState);
     }
 
-    /**
-     * 创建Presenter
-     *
-     * @return Presenter
-     */
-    protected abstract P createPresenter();
-
-    public P getPresenter() {
-        return presenter;
+    @SuppressWarnings("unchecked")
+    protected P createPresenter() {
+        return (P) new MvpContract.CommonPresenter();
     }
 
     @Override
     protected void onDestroy() {
-        if (presenter instanceof BasePresenter) {
-            ((BasePresenter) presenter).onDestroy();
+        if (presenter != null) {
+            presenter.onDestroy();
         }
         super.onDestroy();
     }

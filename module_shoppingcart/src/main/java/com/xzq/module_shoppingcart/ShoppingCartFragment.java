@@ -11,7 +11,7 @@ import com.xzq.module_base.utils.XZQLog;
  * ShoppingCartFragment
  * Created by xzq on 2018/12/20.
  */
-public class ShoppingCartFragment extends BasePresenterFragment<ShoppingCartPresenter> implements ShoppingCartContract.SCView {
+public class ShoppingCartFragment extends BasePresenterFragment {
 
     public static ShoppingCartFragment newInstance() {
 
@@ -20,11 +20,6 @@ public class ShoppingCartFragment extends BasePresenterFragment<ShoppingCartPres
         ShoppingCartFragment fragment = new ShoppingCartFragment();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    protected ShoppingCartPresenter createPresenter() {
-        return new ShoppingCartPresenter(this);
     }
 
     @Override
@@ -45,11 +40,6 @@ public class ShoppingCartFragment extends BasePresenterFragment<ShoppingCartPres
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-
-    }
-
-    @Override
-    public void setData(Object o) {
 
     }
 }

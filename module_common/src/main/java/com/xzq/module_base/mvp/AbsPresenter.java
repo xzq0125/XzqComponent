@@ -1,6 +1,5 @@
 package com.xzq.module_base.mvp;
 
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 
 import com.xzq.module_base.api.ApiCallback;
@@ -18,14 +17,26 @@ import io.reactivex.disposables.Disposable;
 
 /**
  * 基类Presenter
+ *
+ * @author xzq
  */
+@SuppressWarnings("all")
 public abstract class AbsPresenter<V> implements BasePresenter {
 
-    protected V mView;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    protected V mView;
+    protected int mPage = 1;
 
-    public AbsPresenter(@NonNull V view) {
+    //子类覆盖次方法获取列表内容
+    public void getList() {
+    }
+
+    public void attachView(@NonNull V view) {
         this.mView = view;
+    }
+
+    public void setPage(int mPage) {
+        this.mPage = mPage;
     }
 
     /**
@@ -95,27 +106,20 @@ public abstract class AbsPresenter<V> implements BasePresenter {
         }
 
         @Override
-        protected void onSuccess(E data, String msg, int code, int page, boolean hasNextPage) {
+        protected void onSuccess(NetBean<E> response, E data, int page) {
             if (mView != null) {
-                if (data instanceof List ||
-                        data instanceof BaseListBean) {
-                    if (isFirstPage()) {
-                        onSetData(data, page, hasNextPage);
-                    } else {
-                        onAddData(data, page, hasNextPage);
-                    }
+                if (response.dataIsList()) {
+                    response.checkHasNextPage(page);
+                    onList(response, data, page);
                 } else {
-                    onSuccess(data, msg, code);
+                    onSuccess(response, data);
                 }
             }
         }
 
-        protected abstract void onSuccess(E data, String msg, int code);
+        protected abstract void onSuccess(NetBean<E> response, E data);
 
-        protected void onSetData(E data, int page, boolean hasNextPage) {
-        }
-
-        protected void onAddData(E data, int page, boolean hasNextPage) {
+        protected void onList(NetBean<E> response, E data, int page) {
         }
     }
 
@@ -129,6 +133,16 @@ public abstract class AbsPresenter<V> implements BasePresenter {
      */
     protected <E> Observable<NetBean<E>> doEntityRequest(ApiCallback<E> callback, Class<E> cls) {
         return ModelService.doEntityRequest(cls, callback);
+    }
+
+    /**
+     * 发起网络请求，响应体{@link NetBean}中data字段为Object
+     *
+     * @param callback 回调获取方法
+     * @return Observable
+     */
+    protected Observable<NetBean<Object>> doObjectRequest(ApiCallback<Object> callback) {
+        return doEntityRequest(callback, Object.class);
     }
 
     /**
@@ -151,22 +165,20 @@ public abstract class AbsPresenter<V> implements BasePresenter {
     @SuppressWarnings("all")
     protected <E> void doPagingListRequest(ApiCallback<E> callback) {
         ModelService.doListRequest(callback).subscribe(new StateCallback<E>(1) {
+
             @Override
-            protected void onSuccess(E data, String msg, int code) {
+            protected void onSuccess(NetBean<E> response, E data) {
                 //do nothing
             }
 
             @Override
-            protected void onSetData(E data, int page, boolean hasNextPage) {
-                if (data instanceof List && mView instanceof IListView) {
-                    ((IListView) mView).setData((List) data, page, hasNextPage);
-                }
-            }
-
-            @Override
-            protected void onAddData(E data, int page, boolean hasNextPage) {
-                if (data instanceof List && mView instanceof IListView) {
-                    ((IListView) mView).addData((List) data, page, hasNextPage);
+            protected void onList(NetBean<E> response, E data, int page) {
+                if (mView instanceof IListView) {
+                    if (isFirstPage() && data instanceof List) {
+                        ((IListView) mView).setData((List) data, page, response.hasNextPage());
+                    } else {
+                        ((IListView) mView).addData((List) data, page, response.hasNextPage());
+                    }
                 }
             }
         });
@@ -180,26 +192,22 @@ public abstract class AbsPresenter<V> implements BasePresenter {
      * @return Observable
      */
     @SuppressWarnings("all")
-    @SuppressLint("CheckResult")
     protected <E> void doBaseListRequest(ApiCallback<E> callback, int page) {
         ModelService.doEntityRequest2((E) new BaseListBean<>(), callback)
                 .subscribe(new StateCallback<E>(page) {
                     @Override
-                    protected void onSuccess(E data, String msg, int code) {
+                    protected void onSuccess(NetBean<E> response, E data) {
                         //do nothing
                     }
 
                     @Override
-                    protected void onSetData(E data, int page, boolean hasNextPage) {
+                    protected void onList(NetBean<E> response, E data, int page) {
                         if (mView instanceof IListView && data instanceof BaseListBean) {
-                            ((IListView) mView).setData(((BaseListBean) data).getList(), page, hasNextPage);
-                        }
-                    }
-
-                    @Override
-                    protected void onAddData(E data, int page, boolean hasNextPage) {
-                        if (mView instanceof IListView && data instanceof BaseListBean) {
-                            ((IListView) mView).addData(((BaseListBean) data).getList(), page, hasNextPage);
+                            if (isFirstPage()) {
+                                ((IListView) mView).setData((List) ((BaseListBean) data).getList(), page, response.hasNextPage());
+                            } else {
+                                ((IListView) mView).addData((List) ((BaseListBean) data).getList(), page, response.hasNextPage());
+                            }
                         }
                     }
                 });

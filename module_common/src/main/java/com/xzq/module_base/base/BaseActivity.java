@@ -16,9 +16,10 @@ import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.xzq.module_base.R;
+import com.xzq.module_base.dialog.PostLoadingDialog;
 import com.xzq.module_base.eventbus.EventUtil;
 import com.xzq.module_base.eventbus.MessageEvent;
-import com.xzq.module_base.mvp.IStateView;
+import com.xzq.module_base.mvp.MvpContract;
 import com.xzq.module_base.utils.XZQLog;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -37,7 +38,10 @@ import butterknife.Unbinder;
  * @author xzq
  */
 
-public abstract class BaseActivity extends AppCompatActivity implements IStateView, OnRefreshListener, StateFrameLayout.OnStateClickListener {
+public abstract class BaseActivity extends AppCompatActivity implements
+        OnRefreshListener,
+        StateFrameLayout.OnStateClickListener,
+        MvpContract.CommonView {
 
     //Activity生命周期
     private ActivityState mState = ActivityState.CREATE;
@@ -58,38 +62,28 @@ public abstract class BaseActivity extends AppCompatActivity implements IStateVi
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mState = ActivityState.CREATE;
-
+        XZQLog.debug("BaseActivity", getClass().getSimpleName());
         if (getClass().getSimpleName().equals("com.xzq.component.MainActivity")) {
             overridePendingTransition(R.anim.activity_open_enter_main, R.anim.activity_open_exit);
         } else {
             overridePendingTransition(R.anim.activity_open_enter, R.anim.activity_open_exit);
         }
-
-        XZQLog.debug("BaseActivity", getClass().getSimpleName());
         EventUtil.register(this);
         final int layoutId = getLayoutId();
-
         ViewGroup contentParent = findViewById(android.R.id.content);
-
-        XZQLog.debug("contentParent = " + contentParent);
-
         View contentView = LayoutInflater.from(this)
                 .inflate(R.layout.activity_base, contentParent, false);
-
-
         sfl = contentView.findViewById(R.id.sfl);
         sfl.setOnStateClickListener(this);
         refreshLayout = contentView.findViewById(R.id.refreshLayout);
         refreshLayout.setOnRefreshListener(this);
-
+        setRefreshEnable(false);
         if (layoutId > 0) {
             View src = LayoutInflater.from(this)
                     .inflate(layoutId, sfl);
             unbinder = ButterKnife.bind(this, src);
         }
-
         setContentView(contentView);
-
         initViews(savedInstanceState);
         onErrorClick(null);
     }
@@ -98,8 +92,8 @@ public abstract class BaseActivity extends AppCompatActivity implements IStateVi
         findViewById(R.id.toolbar).setVisibility(View.GONE);
     }
 
-    protected void setRefreshEnable() {
-        refreshLayout.setEnabled(false);
+    protected void setRefreshEnable(boolean enabled) {
+        refreshLayout.setEnabled(enabled);
     }
 
     /**
@@ -155,6 +149,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IStateVi
         if (unbinder != null) {
             unbinder.unbind();
         }
+        hidePostLoading();
     }
 
     protected boolean isActivityResume() {
@@ -274,6 +269,17 @@ public abstract class BaseActivity extends AppCompatActivity implements IStateVi
         XZQLog.debug("onHideLoading");
     }
 
+    @Override
+    public void onShowPostLoading(String loadingMessage) {
+        XZQLog.debug("onShowPostLoading loadingMessage = " + loadingMessage);
+        showPostLoading();
+    }
+
+    @Override
+    public void onHidePostLoading() {
+        XZQLog.debug("onHidePostLoading");
+        hidePostLoading();
+    }
 
     @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
@@ -292,9 +298,24 @@ public abstract class BaseActivity extends AppCompatActivity implements IStateVi
     protected void getFirstPageData() {
     }
 
+    private PostLoadingDialog mLoadingDialog;
+
+    public void showPostLoading() {
+        if (mLoadingDialog == null) {
+            mLoadingDialog = new PostLoadingDialog(this);
+        }
+        mLoadingDialog.show();
+    }
+
+    public void hidePostLoading() {
+        if (mLoadingDialog != null) {
+            mLoadingDialog.dismiss();
+        }
+    }
+
     @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(R.anim.activity_close_enter, R.anim.activity_close_exit);
+        overridePendingTransition(0, R.anim.activity_close_exit);
     }
 }

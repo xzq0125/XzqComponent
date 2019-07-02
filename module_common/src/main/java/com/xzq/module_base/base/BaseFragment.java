@@ -6,9 +6,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +16,10 @@ import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.xzq.module_base.R;
+import com.xzq.module_base.dialog.PostLoadingDialog;
 import com.xzq.module_base.eventbus.EventUtil;
 import com.xzq.module_base.eventbus.MessageEvent;
-import com.xzq.module_base.mvp.IStateView;
+import com.xzq.module_base.mvp.MvpContract;
 import com.xzq.module_base.utils.XZQLog;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -34,14 +33,13 @@ import butterknife.Unbinder;
 
 /**
  * Fragment基础类
- * 实现一些通用逻辑
  *
  * @author xzq
  */
-public abstract class BaseFragment extends Fragment
-        implements IStateView,
+public abstract class BaseFragment extends Fragment implements
+        OnRefreshListener,
         StateFrameLayout.OnStateClickListener,
-        OnRefreshListener {
+        MvpContract.CommonView {
 
     private Unbinder unbinder;
 
@@ -93,8 +91,10 @@ public abstract class BaseFragment extends Fragment
 
     @Override
     public void onDestroyView() {
-        if (unbinder != null)
+        if (unbinder != null) {
             unbinder.unbind();
+        }
+        hidePostLoading();
         super.onDestroyView();
     }
 
@@ -107,11 +107,12 @@ public abstract class BaseFragment extends Fragment
         super.onCreateView(inflater, container, savedInstanceState);
         final int layoutId = getLayoutId(inflater, container, savedInstanceState);
         View rootView = LayoutInflater.from(me)
-                .inflate(R.layout.activity_base, container, false);
+                .inflate(R.layout.fragment_base, container, false);
         sfl = rootView.findViewById(R.id.sfl);
         sfl.setOnStateClickListener(this);
         refreshLayout = rootView.findViewById(R.id.refreshLayout);
         refreshLayout.setOnRefreshListener(this);
+        setRefreshEnable(false);
         if (layoutId > 0) {
             View src = LayoutInflater.from(me)
                     .inflate(layoutId, sfl);
@@ -120,8 +121,8 @@ public abstract class BaseFragment extends Fragment
         return rootView;
     }
 
-    protected void hideToolbar() {
-        findViewById(R.id.toolbar).setVisibility(View.GONE);
+    protected void setRefreshEnable(boolean enabled) {
+        refreshLayout.setEnabled(enabled);
     }
 
     @Override
@@ -132,44 +133,9 @@ public abstract class BaseFragment extends Fragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        hideToolbar();
         initViews(savedInstanceState);
         onErrorClick(null);
     }
-
-    @SuppressWarnings("all")
-    public void setToolbar(String title) {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            //标题
-            TextView titleView = (TextView) toolbar.findViewById(R.id.toolbar_title);
-            if (titleView != null) {
-                titleView.setText(title);
-            }
-            //返回按钮
-            View btnBack = toolbar.findViewById(R.id.toolbar_btn_back);
-            if (btnBack != null) {
-                btnBack.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        getActivity().onBackPressed();
-                    }
-                });
-            } else {
-                toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        getActivity().onBackPressed();
-                    }
-                });
-            }
-        }
-    }
-
-    public void setToolbar(@StringRes int resId) {
-        setToolbar(getString(resId));
-    }
-
 
     /**
      * 设置内容Layout
@@ -281,6 +247,18 @@ public abstract class BaseFragment extends Fragment
     }
 
     @Override
+    public void onShowPostLoading(String loadingMessage) {
+        XZQLog.debug("onShowPostLoading loadingMessage = " + loadingMessage);
+        showPostLoading();
+    }
+
+    @Override
+    public void onHidePostLoading() {
+        XZQLog.debug("onHidePostLoading");
+        hidePostLoading();
+    }
+
+    @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
         isRefresh = true;
         getFirstPageData();
@@ -295,6 +273,21 @@ public abstract class BaseFragment extends Fragment
     private boolean isRefresh = false;
 
     protected void getFirstPageData() {
+    }
+
+    private PostLoadingDialog mLoadingDialog;
+
+    public void showPostLoading() {
+        if (mLoadingDialog == null) {
+            mLoadingDialog = new PostLoadingDialog(me);
+        }
+        mLoadingDialog.show();
+    }
+
+    public void hidePostLoading() {
+        if (mLoadingDialog != null) {
+            mLoadingDialog.dismiss();
+        }
     }
 
 }

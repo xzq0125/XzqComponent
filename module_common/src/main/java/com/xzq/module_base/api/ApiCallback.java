@@ -4,7 +4,8 @@ import io.reactivex.Observable;
 
 /**
  * Api回调
- * Created by xzq on 2019/5/24.
+ *
+ * @author xzq
  */
 public interface ApiCallback<T> {
     /**
