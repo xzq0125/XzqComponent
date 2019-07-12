@@ -41,11 +41,6 @@ public class OrderFragment extends BaseListFragment<MvpContract.RXMVPPresenter, 
     }
 
     @Override
-    protected String getPageTitle() {
-        return null;
-    }
-
-    @Override
     protected RecyclerView.Adapter getPageAdapter() {
         return new MyAdapter().setOnItemClickListener((v, data, pos) -> ToastUtils.show(data.title + pos));
     }

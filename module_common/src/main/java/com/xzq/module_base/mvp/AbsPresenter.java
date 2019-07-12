@@ -173,11 +173,11 @@ public abstract class AbsPresenter<V> implements BasePresenter {
 
             @Override
             protected void onList(NetBean<E> response, E data, int page) {
-                if (mView instanceof IListView) {
-                    if (isFirstPage() && data instanceof List) {
-                        ((IListView) mView).setData((List) data, page, response.hasNextPage());
+                if (mView instanceof IListView && data instanceof List) {
+                    if (isFirstPage()) {
+                        ((IListView) mView).setData((List) data, page, response.hasNextPage(), response.getTotalCount());
                     } else {
-                        ((IListView) mView).addData((List) data, page, response.hasNextPage());
+                        ((IListView) mView).addData((List) data, page, response.hasNextPage(), response.getTotalCount());
                     }
                 }
             }
@@ -204,9 +204,11 @@ public abstract class AbsPresenter<V> implements BasePresenter {
                     protected void onList(NetBean<E> response, E data, int page) {
                         if (mView instanceof IListView && data instanceof BaseListBean) {
                             if (isFirstPage()) {
-                                ((IListView) mView).setData((List) ((BaseListBean) data).getList(), page, response.hasNextPage());
+                                ((IListView) mView).setData((List) ((BaseListBean) data).getList(), page,
+                                        response.hasNextPage(), ((BaseListBean) data).getTotalCount());
                             } else {
-                                ((IListView) mView).addData((List) ((BaseListBean) data).getList(), page, response.hasNextPage());
+                                ((IListView) mView).addData((List) ((BaseListBean) data).getList(), page,
+                                        response.hasNextPage(), ((BaseListBean) data).getTotalCount());
                             }
                         }
                     }

@@ -15,14 +15,16 @@ public interface IListView<Entity> {
      *
      * @param list        数据列表
      * @param hasNextPage 是否有下一页列表
+     * @param totalCount  总数量
      */
-    void setData(List<Entity> list, int page, boolean hasNextPage);
+    void setData(List<Entity> list, int page, boolean hasNextPage, int totalCount);
 
     /**
      * 追加数据
      *
      * @param list        数据列表
      * @param hasNextPage 是否有下一页列表
+     * @param totalCount  总数量
      */
-    void addData(List<Entity> list, int page, boolean hasNextPage);
+    void addData(List<Entity> list, int page, boolean hasNextPage, int totalCount);
 }

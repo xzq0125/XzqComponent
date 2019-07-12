@@ -96,7 +96,7 @@ public abstract class BaseListActivity<P extends MvpContract.CommonPresenter, T>
     }
 
     @Override
-    public void setData(List<T> list, int page, boolean hasNextPage) {
+    public void setData(List<T> list, int page, boolean hasNextPage, int totalCount) {
         if (hasNextPage) {
             mPage++;
         }
@@ -106,7 +106,7 @@ public abstract class BaseListActivity<P extends MvpContract.CommonPresenter, T>
     }
 
     @Override
-    public void addData(List<T> list, int page, boolean hasNextPage) {
+    public void addData(List<T> list, int page, boolean hasNextPage, int totalCount) {
         if (hasNextPage) {
             mPage++;
         }

@@ -40,6 +40,9 @@ public class BaseRecyclerFooterAdapter<T>
     }
 
     public BaseRecyclerFooterAdapter(OnLoadMoreCallback loadMoreCallback, RecyclerView.Adapter adapter) {
+        if (adapter == null) {
+            throw new NullPointerException("adapter == null");
+        }
         this.loadMoreCallback = loadMoreCallback;
         this.mUserAdapter = adapter;
         this.mUserAdapter.registerAdapterDataObserver(new MyAdapterDataObserver(new SoftReference<RecyclerView.Adapter>(this)));

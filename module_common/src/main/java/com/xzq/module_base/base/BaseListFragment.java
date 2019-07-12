@@ -97,7 +97,7 @@ public abstract class BaseListFragment<P extends MvpContract.CommonPresenter, T>
     }
 
     @Override
-    public void setData(List<T> list, int page, boolean hasNextPage) {
+    public void setData(List<T> list, int page, boolean hasNextPage, int totalCount) {
         if (hasNextPage) {
             mPage++;
         }
@@ -107,7 +107,7 @@ public abstract class BaseListFragment<P extends MvpContract.CommonPresenter, T>
     }
 
     @Override
-    public void addData(List<T> list, int page, boolean hasNextPage) {
+    public void addData(List<T> list, int page, boolean hasNextPage, int totalCount) {
         if (hasNextPage) {
             mPage++;
         }
@@ -137,13 +137,6 @@ public abstract class BaseListFragment<P extends MvpContract.CommonPresenter, T>
         recyclerView.addItemDecoration(DividerFactory.VERTICAL);
         recyclerView.setLayoutManager(new LinearLayoutManager(me));
     }
-
-    /**
-     * 获取页面标题
-     *
-     * @return 标题
-     */
-    protected abstract String getPageTitle();
 
     /**
      * 获取页面适配器

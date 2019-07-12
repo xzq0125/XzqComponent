@@ -1,5 +1,7 @@
 package com.xzq.module_base.api;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -11,7 +13,10 @@ public class NetBean<T> {
     private int status;//code
     private String msg;//信息
     private T data;// 返回数据
-    private int count;//服务端定义数组返回形式总页数
+    @SerializedName(value = "snPageCount", alternate = {"pageCount"})
+    private int snPageCount;
+    @SerializedName(value = "snTotalCount", alternate = {"count"})
+    private int snTotalCount;
     private boolean localHasNextPage;//本地字段
 
     public boolean isOk() {
@@ -30,6 +35,10 @@ public class NetBean<T> {
         return msg;
     }
 
+    public int getTotalCount() {
+        return snTotalCount;
+    }
+
     public boolean hasNextPage() {
         return localHasNextPage;
     }
@@ -40,7 +49,7 @@ public class NetBean<T> {
         if (entity instanceof BaseListBean) {
             hasNextPage = ((BaseListBean) entity).hasNextPage(mPage);
         } else {
-            hasNextPage = mPage < count;
+            hasNextPage = mPage < snPageCount;
         }
         this.localHasNextPage = hasNextPage;
     }

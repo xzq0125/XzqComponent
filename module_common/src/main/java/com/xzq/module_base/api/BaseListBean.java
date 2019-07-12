@@ -14,7 +14,10 @@ public class BaseListBean<T> {
 
     @SerializedName(value = "snPageCount", alternate = {"pageCount"})
     private int snPageCount;
-    public int count;
+    @SerializedName(value = "snTotalCount", alternate = {"count"})
+    private int snTotalCount;
+    @SerializedName(value = "snData", alternate = {"data", "rows", "datas"})
+    private List<T> snData;
 
     /**
      * 是否还有下一页
@@ -26,11 +29,12 @@ public class BaseListBean<T> {
         return page < snPageCount;
     }
 
-    @SerializedName(value = "snData", alternate = {"data", "rows", "datas"})
-    private List<T> snData;
-
     public List<T> getList() {
         return snData;
+    }
+
+    public int getTotalCount() {
+        return snTotalCount;
     }
 
     public boolean isEmpty() {
