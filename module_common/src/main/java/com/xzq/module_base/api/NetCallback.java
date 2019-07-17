@@ -4,11 +4,11 @@ import android.net.ParseException;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.xzq.module_base.mvp.IPostLoadingView;
 import com.xzq.module_base.mvp.IStateView;
-import com.xzq.module_base.utils.ToastUtils;
 
 import org.json.JSONException;
 
@@ -27,7 +27,7 @@ import io.reactivex.disposables.Disposable;
 @SuppressWarnings("all")
 public abstract class NetCallback<T> implements Observer<NetBean<T>> {
 
-    private static final int FIRST_PAGE_INDEX = 1;
+    public static int FIRST_PAGE_INDEX = 10000;
     //本地自定义错误码
     public static final int CODE_JSON = -125;
     public static final int CODE_TIMEOUT = -126;
@@ -77,7 +77,7 @@ public abstract class NetCallback<T> implements Observer<NetBean<T>> {
     @Override
     public void onNext(@NonNull NetBean<T> response) {
         final String msg = response.getMsg();
-        final int code = response.getStatus();
+        final int code = response.getCode();
         if (response.isOk()) {
             onComplete();
             T entity = response.getData();
@@ -208,7 +208,7 @@ public abstract class NetCallback<T> implements Observer<NetBean<T>> {
      */
     protected void onError(String error, int code) {
         if (mStateLoading == null) {
-            ToastUtils.show(error);
+            ToastUtils.showShort(error);
         }
     }
 }

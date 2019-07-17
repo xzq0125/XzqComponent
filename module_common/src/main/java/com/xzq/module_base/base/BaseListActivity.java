@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import com.xzq.module_base.R;
 import com.xzq.module_base.adapter.BaseRecyclerFooterAdapter;
 import com.xzq.module_base.adapter.IAdapter;
+import com.xzq.module_base.api.NetCallback;
 import com.xzq.module_base.mvp.IListView;
 import com.xzq.module_base.mvp.MvpContract;
 import com.xzq.module_base.utils.DividerFactory;
@@ -29,7 +30,7 @@ public abstract class BaseListActivity<P extends MvpContract.CommonPresenter, T>
 
     protected RecyclerView recyclerView;
     protected IAdapter<T> mAdapter;
-    protected int mPage = 1;
+    protected int mPage = NetCallback.FIRST_PAGE_INDEX;
 
     @Override
     protected int getLayoutId() {
@@ -41,6 +42,7 @@ public abstract class BaseListActivity<P extends MvpContract.CommonPresenter, T>
         setRefreshEnable(true);
         setToolbar(getPageTitle());
         BaseRecyclerFooterAdapter<T> wrapAdapter = new BaseRecyclerFooterAdapter<>(getPageAdapter());
+        wrapAdapter.setAlwaysShowFooter(alwaysShowFooter());
         wrapAdapter.setLoadMoreCallback(this);
         mAdapter = wrapAdapter;
         recyclerView = findViewById(R.id.recyclerView);
@@ -123,7 +125,7 @@ public abstract class BaseListActivity<P extends MvpContract.CommonPresenter, T>
     }
 
     public void refresh() {
-        mPage = 1;
+        mPage = NetCallback.FIRST_PAGE_INDEX;
         onPageLoad(mPage);
     }
 
@@ -150,4 +152,8 @@ public abstract class BaseListActivity<P extends MvpContract.CommonPresenter, T>
      * @return 适配器
      */
     protected abstract RecyclerView.Adapter getPageAdapter();
+
+    protected boolean alwaysShowFooter() {
+        return true;
+    }
 }

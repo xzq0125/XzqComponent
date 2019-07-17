@@ -28,8 +28,9 @@ public class BaseRecyclerFooterAdapter<T>
 
     private static final int TYPE_FOOTER = 464564876;
     private LayoutInflater mInflater = null;
-    protected boolean hasNext = false;//是否有下一页
-    protected boolean showFooter = false;//是否显示页脚
+    private boolean hasNext = false;//是否有下一页
+    private boolean showFooter = false;//是否显示页脚
+    private boolean alwaysShowFooter = false;//是否总是显示页脚
     private boolean isLoadingMore = false;//是否正在加载更多,防止多次回调
     protected OnLoadMoreCallback loadMoreCallback;//加载更多回调
     private StateFrameLayout sflLoadMore;
@@ -72,6 +73,10 @@ public class BaseRecyclerFooterAdapter<T>
 
     RecyclerView.ViewHolder onCreateFooterViewHolder(View itemView) {
         return new LoadMoreViewHolder(itemView);
+    }
+
+    public void setAlwaysShowFooter(boolean allwaysShowFooter) {
+        this.alwaysShowFooter = allwaysShowFooter;
     }
 
     class LoadMoreViewHolder extends RecyclerView.ViewHolder {
@@ -135,7 +140,7 @@ public class BaseRecyclerFooterAdapter<T>
         isLoadingMore = false;
         if (data != null) {
             this.hasNext = hasNext;
-            this.showFooter = hasNext && !data.isEmpty();
+            this.showFooter = alwaysShowFooter || (hasNext && !data.isEmpty());
             if (mUserAdapter instanceof IAdapter) {
                 ((IAdapter) mUserAdapter).setData(data, hasNext);
             }

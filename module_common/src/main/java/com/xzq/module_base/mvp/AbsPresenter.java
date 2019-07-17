@@ -87,7 +87,7 @@ public abstract class AbsPresenter<V> implements BasePresenter {
          * 创建一个带状态的网络回调
          */
         public StateCallback() {
-            this(1);
+            this(mPage);
         }
 
         /**
@@ -164,7 +164,7 @@ public abstract class AbsPresenter<V> implements BasePresenter {
      */
     @SuppressWarnings("all")
     protected <E> void doPagingListRequest(ApiCallback<E> callback) {
-        ModelService.doListRequest(callback).subscribe(new StateCallback<E>(1) {
+        ModelService.doListRequest(callback).subscribe(new StateCallback<E>() {
 
             @Override
             protected void onSuccess(NetBean<E> response, E data) {
@@ -192,9 +192,9 @@ public abstract class AbsPresenter<V> implements BasePresenter {
      * @return Observable
      */
     @SuppressWarnings("all")
-    protected <E> void doBaseListRequest(ApiCallback<E> callback, int page) {
+    protected <E> void doBaseListRequest(ApiCallback<E> callback) {
         ModelService.doEntityRequest2((E) new BaseListBean<>(), callback)
-                .subscribe(new StateCallback<E>(page) {
+                .subscribe(new StateCallback<E>() {
                     @Override
                     protected void onSuccess(NetBean<E> response, E data) {
                         //do nothing

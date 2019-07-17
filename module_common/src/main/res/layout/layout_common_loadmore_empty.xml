@@ -6,5 +6,5 @@
     android:clickable="false"
     android:gravity="center_horizontal"
     android:text="@string/ba_load_more_empty_msg"
-    android:textColor="@color/color_1a1a1a"
+    android:textColor="@color/color_999999"
     android:textSize="14sp" />

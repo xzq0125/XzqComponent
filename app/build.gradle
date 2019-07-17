@@ -75,10 +75,5 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':module_common')
-    implementation project(':module_login')
-    implementation project(':module_views')
-    implementation project(':module_homepage')
-    implementation project(':module_me')
-    implementation project(':module_order')
-    implementation project(':module_shoppingcart')
+    annotationProcessor "com.alibaba:arouter-compiler:$rootProject.ext.arouterCompiler"
 }

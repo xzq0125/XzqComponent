@@ -83,4 +83,5 @@ dependencies {
     //底部tabbar
     api 'com.jpeng:JPTabBar:1.4.0'
 
+    api 'com.blankj:utilcode:1.23.7'
 }

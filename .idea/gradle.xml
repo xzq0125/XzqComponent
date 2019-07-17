@@ -10,12 +10,6 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/module_common" />
-            <option value="$PROJECT_DIR$/module_homepage" />
-            <option value="$PROJECT_DIR$/module_login" />
-            <option value="$PROJECT_DIR$/module_me" />
-            <option value="$PROJECT_DIR$/module_order" />
-            <option value="$PROJECT_DIR$/module_shoppingcart" />
-            <option value="$PROJECT_DIR$/module_views" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

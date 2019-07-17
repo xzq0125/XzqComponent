@@ -20,7 +20,7 @@ public interface MvpContract {
 
         @Override
         public void getList() {
-            doBaseListRequest(api -> api.getWangAndroidHomePage(mPage), mPage);
+            doBaseListRequest(api -> api.getWangAndroidHomePage(mPage));
         }
     }
 

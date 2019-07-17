@@ -10,7 +10,7 @@ import java.util.List;
  * @author xzq
  */
 public class NetBean<T> {
-    private int status;//code
+    private int errorCode;//code
     private String msg;//信息
     private T data;// 返回数据
     @SerializedName(value = "snPageCount", alternate = {"pageCount"})
@@ -20,11 +20,11 @@ public class NetBean<T> {
     private boolean localHasNextPage;//本地字段
 
     public boolean isOk() {
-        return status == 0;
+        return errorCode == 0;
     }
 
-    public int getStatus() {
-        return status;
+    public int getCode() {
+        return errorCode;
     }
 
     public T getData() {
@@ -49,7 +49,7 @@ public class NetBean<T> {
         if (entity instanceof BaseListBean) {
             hasNextPage = ((BaseListBean) entity).hasNextPage(mPage);
         } else {
-            hasNextPage = mPage < snPageCount;
+            hasNextPage = mPage < snPageCount - 1;
         }
         this.localHasNextPage = hasNextPage;
     }
@@ -60,7 +60,7 @@ public class NetBean<T> {
 
     public void copyFrom(NetBean<T> netBean) {
         this.data = netBean.getData();
-        this.status = netBean.getStatus();
+        this.errorCode = netBean.getCode();
         this.msg = netBean.getMsg();
     }
 

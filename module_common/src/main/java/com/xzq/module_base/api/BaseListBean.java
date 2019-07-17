@@ -26,7 +26,7 @@ public class BaseListBean<T> {
      * @return 是否还有下一页
      */
     public boolean hasNextPage(final int page) {
-        return page < snPageCount;
+        return page < snPageCount - 1;
     }
 
     public List<T> getList() {

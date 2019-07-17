@@ -63,7 +63,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         mState = ActivityState.CREATE;
         XZQLog.debug("BaseActivity", getClass().getSimpleName());
-        if (getClass().getSimpleName().equals("com.xzq.component.MainActivity")) {
+        if ("com.xzq.component.MainActivity".equals(getClass().getName())) {
             overridePendingTransition(R.anim.activity_open_enter_main, R.anim.activity_open_exit);
         } else {
             overridePendingTransition(R.anim.activity_open_enter, R.anim.activity_open_exit);
@@ -316,6 +316,10 @@ public abstract class BaseActivity extends AppCompatActivity implements
     @Override
     public void finish() {
         super.finish();
+        activityExit();
+    }
+
+    protected void activityExit() {
         overridePendingTransition(0, R.anim.activity_close_exit);
     }
 }

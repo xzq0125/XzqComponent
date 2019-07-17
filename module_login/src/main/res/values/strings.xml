@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">module_login</string>
-    <string name="phone_text">请输入手机号</string>
-    <string name="code_text">请输入验证码</string>
-    <string name="get_code">获取验证码</string>
-    <string name="login_nickname_hit">请输入昵称</string>
-    <string name="login">登录</string>
-    <string name="login_third_hit">使用第三方登陆</string>
-</resources>

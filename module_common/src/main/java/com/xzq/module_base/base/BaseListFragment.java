@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import com.xzq.module_base.R;
 import com.xzq.module_base.adapter.BaseRecyclerFooterAdapter;
 import com.xzq.module_base.adapter.IAdapter;
+import com.xzq.module_base.api.NetCallback;
 import com.xzq.module_base.mvp.IListView;
 import com.xzq.module_base.mvp.MvpContract;
 import com.xzq.module_base.utils.DividerFactory;
@@ -30,7 +31,7 @@ public abstract class BaseListFragment<P extends MvpContract.CommonPresenter, T>
 
     protected RecyclerView recyclerView;
     protected IAdapter<T> mAdapter;
-    protected int mPage = 1;
+    protected int mPage = NetCallback.FIRST_PAGE_INDEX;
 
     @Override
     protected int getLayoutId(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,6 +43,7 @@ public abstract class BaseListFragment<P extends MvpContract.CommonPresenter, T>
         setRefreshEnable(true);
         BaseRecyclerFooterAdapter<T> wrapAdapter = new BaseRecyclerFooterAdapter<>(getPageAdapter());
         wrapAdapter.setLoadMoreCallback(this);
+        wrapAdapter.setAlwaysShowFooter(alwaysShowFooter());
         mAdapter = wrapAdapter;
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setAdapter(wrapAdapter);
@@ -124,7 +126,7 @@ public abstract class BaseListFragment<P extends MvpContract.CommonPresenter, T>
     }
 
     public void refresh() {
-        mPage = 1;
+        mPage = NetCallback.FIRST_PAGE_INDEX;
         onPageLoad(mPage);
     }
 
@@ -145,4 +147,7 @@ public abstract class BaseListFragment<P extends MvpContract.CommonPresenter, T>
      */
     protected abstract RecyclerView.Adapter getPageAdapter();
 
+    protected boolean alwaysShowFooter() {
+        return true;
+    }
 }
