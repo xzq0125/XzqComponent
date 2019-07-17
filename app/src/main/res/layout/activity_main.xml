@@ -16,19 +16,20 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="pagingLoadError"
-        android:text="加载出错" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:onClick="pagingLoadEmpty"
         android:text="加载为空" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="pagingLoadCustom"
-        android:text="自定义状态布局" />
+        android:onClick="pagingLoadCustomLoading"
+        android:text="自定义加载中..." />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="pagingLoadCustomEmpty"
+        android:text="自定义空布局" />
+
 
 </LinearLayout>

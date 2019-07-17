@@ -37,18 +37,18 @@ public class MainActivity extends BaseActivity {
         RouterUtils.openMvp();
     }
 
-    public void pagingLoadError(View view) {
-        NetCallback.FIRST_PAGE_INDEX = -1;
-        RouterUtils.openMvp();
-    }
-
     public void pagingLoadEmpty(View view) {
         NetCallback.FIRST_PAGE_INDEX = 10000;
         RouterUtils.openMvp();
     }
 
-    public void pagingLoadCustom(View view) {
-        NetCallback.FIRST_PAGE_INDEX = 0;
+    public void pagingLoadCustomLoading(View view) {
+        NetCallback.FIRST_PAGE_INDEX = 335;
+        RouterUtils.openMvp();
+    }
+
+    public void pagingLoadCustomEmpty(View view) {
+        NetCallback.FIRST_PAGE_INDEX = 10001;
         RouterUtils.openMvp();
     }
 }

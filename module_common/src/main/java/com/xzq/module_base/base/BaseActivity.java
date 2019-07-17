@@ -55,8 +55,9 @@ public abstract class BaseActivity extends AppCompatActivity implements
         CREATE, START, RESTART, RESUME, PAUSE, STOP, DESTROY
     }
 
-    private StateFrameLayout sfl;
+    protected StateFrameLayout sfl;
     protected SmartRefreshLayout refreshLayout;
+    protected StateConfig stateConfig = new StateConfig();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +76,15 @@ public abstract class BaseActivity extends AppCompatActivity implements
                 .inflate(R.layout.activity_base, contentParent, false);
         sfl = contentView.findViewById(R.id.sfl);
         sfl.setOnStateClickListener(this);
+        if (stateConfig.loadingLayoutId > 0) {
+            sfl.setLoadingView(stateConfig.getViewById(sfl, stateConfig.loadingLayoutId));
+        }
+        if (stateConfig.emptyLayoutId > 0) {
+            sfl.setEmptyView(stateConfig.getViewById(sfl, stateConfig.emptyLayoutId));
+        }
+        if (stateConfig.errorLayoutId > 0) {
+            sfl.setErrorView(stateConfig.getViewById(sfl, stateConfig.errorLayoutId));
+        }
         refreshLayout = contentView.findViewById(R.id.refreshLayout);
         refreshLayout.setOnRefreshListener(this);
         setRefreshEnable(false);
